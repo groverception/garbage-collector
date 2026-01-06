@@ -14,7 +14,7 @@ import { Input } from '@/src/components/common/Input';
 import { Button } from '@/src/components/common/Button';
 import { useAppContext } from '@/src/context/AppContext';
 import { useOnboarding } from '@/src/hooks/useOnboarding';
-import { deleteAllUploads } from '@/src/services/database/uploads';
+import { useUploads } from '@/src/hooks/useUploads';
 import { COLORS } from '@/src/constants/colors';
 import { SPACING, FONT_SIZES, normalize, getContentWidth } from '@/src/utils/responsive';
 
@@ -42,6 +42,7 @@ function showAlert(title: string, message: string, onConfirm?: () => void) {
 export default function SettingsScreen() {
   const { userName, setUserName, isLoading } = useAppContext();
   const { resetOnboarding } = useOnboarding();
+  const { deleteAllUploads } = useUploads();
   const [localName, setLocalName] = useState(userName);
   const [isSaving, setIsSaving] = useState(false);
 
