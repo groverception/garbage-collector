@@ -26,8 +26,8 @@ export function SuccessModal({ visible, onClose }: SuccessModalProps) {
   useEffect(() => {
     if (visible) {
       opacity.value = withSpring(1);
-      scale.value = withSpring(1, { damping: 12 });
-      checkScale.value = withDelay(200, withSpring(1, { damping: 10 }));
+      scale.value = withSpring(1, { damping: 20, stiffness: 200 });
+      checkScale.value = withDelay(200, withSpring(1, { damping: 18, stiffness: 200 }));
     } else {
       opacity.value = 0;
       scale.value = 0;

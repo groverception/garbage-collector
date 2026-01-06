@@ -68,9 +68,12 @@ export function VolunteerDetailModal({
   });
 
   const isAssignedToMe = task.assignedTo === currentUserName;
+  const isResolved = task.status === 'resolved';
+  const isVerified = task.status === 'verified';
+  const isClosed = isResolved || isVerified;
   const canVolunteer = task.status === 'open';
   const canUpdateStatus = isAssignedToMe && task.status === 'in_progress';
-  const canVerify = task.status === 'resolved' && task.resolvedBy !== currentUserName;
+  const canVerify = isResolved && task.resolvedBy !== currentUserName;
 
   const resetForm = () => {
     setComment('');
@@ -93,6 +96,7 @@ export function VolunteerDetailModal({
     setIsSubmitting(false);
     if (success) {
       resetForm();
+      onClose();
       showAlert('Success', 'Thank you for volunteering! Your help makes a difference.');
     }
   };
@@ -413,8 +417,8 @@ export function VolunteerDetailModal({
                   </View>
                 )}
 
-                {/* Add Comment (always visible for non-open tasks) */}
-                {!canVolunteer && !canVerify && (
+                {/* Add Comment (visible for in_progress tasks only) */}
+                {!canVolunteer && !canVerify && !isClosed && (
                   <View style={styles.actionCard}>
                     <Text style={styles.actionTitle}>Add Comment</Text>
                     <Input
