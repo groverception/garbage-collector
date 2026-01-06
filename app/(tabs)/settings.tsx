@@ -80,10 +80,10 @@ export default function SettingsScreen() {
   const handleResetOnboarding = () => {
     showAlert(
       'Reset Onboarding',
-      'This will show the onboarding screens again next time you open the app.',
+      'This will show the onboarding screens again. You will be redirected to onboarding.',
       async () => {
         await resetOnboarding();
-        showAlert('Success', 'Onboarding has been reset. Refresh the page to see onboarding.');
+        router.replace('/(onboarding)');
       }
     );
   };
