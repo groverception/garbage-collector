@@ -66,7 +66,6 @@ export function AnimatedTitle() {
     <View style={styles.container}>
       <Animated.View style={[styles.titleContainer, animatedStyle]}>
         <Text style={styles.title}>{currentTranslation.text}</Text>
-        <Text style={styles.language}>{currentTranslation.language}</Text>
       </Animated.View>
     </View>
   );
@@ -87,10 +86,5 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     textAlign: 'center',
     paddingHorizontal: SPACING.lg,
-  },
-  language: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-    marginTop: SPACING.sm,
   },
 });
