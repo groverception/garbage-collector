@@ -63,7 +63,7 @@ class WebStorage implements Database {
       imageUri: input.imageUri,
       thumbnailUri: input.thumbnailUri ?? null,
       location: input.location,
-      concern: input.concern,
+      description: input.description,
       userName: input.userName,
       status: 'pending',
       createdAt: now,

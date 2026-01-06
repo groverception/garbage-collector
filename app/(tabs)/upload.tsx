@@ -12,12 +12,10 @@ import { PhotoPicker } from '@/src/components/upload/PhotoPicker';
 import { WarningBanner } from '@/src/components/upload/WarningBanner';
 import { SuccessModal } from '@/src/components/upload/SuccessModal';
 import { Input } from '@/src/components/common/Input';
-import { Dropdown } from '@/src/components/common/Dropdown';
 import { Button } from '@/src/components/common/Button';
 import { useImagePicker } from '@/src/hooks/useImagePicker';
 import { useAppContext } from '@/src/context/AppContext';
 import { createUpload } from '@/src/services/database/uploads';
-import { CONCERN_OPTIONS } from '@/src/constants/concerns';
 import { COLORS } from '@/src/constants/colors';
 import { SPACING, FONT_SIZES, getContentWidth } from '@/src/utils/responsive';
 
@@ -27,7 +25,7 @@ export default function UploadScreen() {
 
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [location, setLocation] = useState('');
-  const [concern, setConcern] = useState('');
+  const [description, setDescription] = useState('');
   const [userName, setUserName] = useState(savedUserName);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -50,8 +48,8 @@ export default function UploadScreen() {
     if (!location.trim()) {
       newErrors.location = 'Please enter the location';
     }
-    if (!concern) {
-      newErrors.concern = 'Please select who this concerns';
+    if (!description.trim()) {
+      newErrors.description = 'Please describe the situation';
     }
     if (!userName.trim()) {
       newErrors.userName = 'Please enter your name';
@@ -71,7 +69,7 @@ export default function UploadScreen() {
       await createUpload({
         imageUri: imageUri!,
         location: location.trim(),
-        concern,
+        description: description.trim(),
         userName: userName.trim(),
       });
 
@@ -88,7 +86,7 @@ export default function UploadScreen() {
     setShowSuccess(false);
     setImageUri(null);
     setLocation('');
-    setConcern('');
+    setDescription('');
   };
 
   return (
@@ -121,13 +119,14 @@ export default function UploadScreen() {
               numberOfLines={2}
             />
 
-            <Dropdown
-              label="To whom does it concern?"
-              placeholder="Select authority"
-              options={CONCERN_OPTIONS}
-              value={concern}
-              onChange={setConcern}
-              error={errors.concern}
+            <Input
+              label="Describe the situation"
+              placeholder="Tell us what you observed..."
+              value={description}
+              onChangeText={setDescription}
+              error={errors.description}
+              multiline
+              numberOfLines={4}
             />
 
             <Input

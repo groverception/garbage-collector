@@ -3,7 +3,6 @@ import { View, Text, Image, StyleSheet, Platform } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { COLORS } from '../../constants/colors';
 import { SPACING, FONT_SIZES, normalize } from '../../utils/responsive';
-import { CONCERN_OPTIONS } from '../../constants/concerns';
 import type { Upload, UploadStatus } from '../../types/upload';
 
 interface HistoryCardProps {
@@ -19,7 +18,6 @@ const STATUS_CONFIG: Record<UploadStatus, { color: string; label: string; icon: 
 
 export function HistoryCard({ upload }: HistoryCardProps) {
   const statusConfig = STATUS_CONFIG[upload.status];
-  const concernLabel = CONCERN_OPTIONS.find((c) => c.value === upload.concern)?.label || upload.concern;
   const formattedDate = new Date(upload.createdAt).toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'short',
@@ -39,8 +37,8 @@ export function HistoryCard({ upload }: HistoryCardProps) {
             <Text style={styles.statusText}>{statusConfig.label}</Text>
           </View>
         </View>
-        <Text style={styles.concern} numberOfLines={1}>
-          {concernLabel}
+        <Text style={styles.description} numberOfLines={1}>
+          {upload.description}
         </Text>
         <Text style={styles.date}>{formattedDate}</Text>
       </View>
@@ -105,7 +103,7 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     fontWeight: '500',
   },
-  concern: {
+  description: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textSecondary,
   },

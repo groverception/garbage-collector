@@ -5,7 +5,7 @@ export interface Upload {
   imageUri: string;
   thumbnailUri: string | null;
   location: string;
-  concern: string;
+  description: string;
   userName: string;
   status: UploadStatus;
   createdAt: string;
@@ -15,13 +15,13 @@ export interface Upload {
 export interface UploadFormData {
   imageUri: string;
   location: string;
-  concern: string;
+  description: string;
 }
 
 export interface CreateUploadInput {
   imageUri: string;
   thumbnailUri?: string;
   location: string;
-  concern: string;
+  description: string;
   userName: string;
 }
