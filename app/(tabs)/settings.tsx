@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   Alert,
   Platform,
 } from 'react-native';
@@ -18,6 +18,27 @@ import { deleteAllUploads } from '@/src/services/database/uploads';
 import { COLORS } from '@/src/constants/colors';
 import { SPACING, FONT_SIZES, normalize, getContentWidth } from '@/src/utils/responsive';
 
+function showAlert(title: string, message: string, onConfirm?: () => void) {
+  if (Platform.OS === 'web') {
+    if (onConfirm) {
+      if (window.confirm(`${title}\n\n${message}`)) {
+        onConfirm();
+      }
+    } else {
+      window.alert(`${title}\n\n${message}`);
+    }
+  } else {
+    if (onConfirm) {
+      Alert.alert(title, message, [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'OK', onPress: onConfirm },
+      ]);
+    } else {
+      Alert.alert(title, message);
+    }
+  }
+}
+
 export default function SettingsScreen() {
   const { userName, setUserName, isLoading } = useAppContext();
   const { resetOnboarding } = useOnboarding();
@@ -30,52 +51,39 @@ export default function SettingsScreen() {
     setIsSaving(true);
     try {
       await setUserName(localName.trim());
-      Alert.alert('Success', 'Name updated successfully');
+      showAlert('Success', 'Name updated successfully');
     } catch (error) {
       console.error('Error saving name:', error);
-      Alert.alert('Error', 'Failed to save name');
+      showAlert('Error', 'Failed to save name');
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleClearHistory = () => {
-    Alert.alert(
+    showAlert(
       'Clear History',
       'Are you sure you want to delete all your reports? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete All',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteAllUploads();
-              Alert.alert('Success', 'All reports have been deleted');
-            } catch (error) {
-              console.error('Error clearing history:', error);
-              Alert.alert('Error', 'Failed to clear history');
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await deleteAllUploads();
+          showAlert('Success', 'All reports have been deleted');
+        } catch (error) {
+          console.error('Error clearing history:', error);
+          showAlert('Error', 'Failed to clear history');
+        }
+      }
     );
   };
 
   const handleResetOnboarding = () => {
-    Alert.alert(
+    showAlert(
       'Reset Onboarding',
       'This will show the onboarding screens again next time you open the app.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          onPress: async () => {
-            await resetOnboarding();
-            Alert.alert('Success', 'Onboarding has been reset');
-          },
-        },
-      ]
+      async () => {
+        await resetOnboarding();
+        showAlert('Success', 'Onboarding has been reset. Refresh the page to see onboarding.');
+      }
     );
   };
 
@@ -155,7 +163,14 @@ function SettingItem({
   destructive,
 }: SettingItemProps) {
   return (
-    <TouchableOpacity style={styles.settingItem} onPress={onPress}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.settingItem,
+        pressed && styles.settingItemPressed,
+        Platform.OS === 'web' && ({ cursor: 'pointer' } as any),
+      ]}
+      onPress={onPress}
+    >
       <View
         style={[
           styles.iconContainer,
@@ -175,7 +190,7 @@ function SettingItem({
         <Text style={styles.settingSubtitle}>{subtitle}</Text>
       </View>
       <FontAwesome name="chevron-right" size={14} color={COLORS.textMuted} />
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -221,6 +236,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: SPACING.sm,
+  },
+  settingItemPressed: {
+    opacity: 0.7,
   },
   iconContainer: {
     width: normalize(36),

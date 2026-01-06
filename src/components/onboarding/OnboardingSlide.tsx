@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { COLORS } from '../../constants/colors';
-import { SPACING, FONT_SIZES, normalize, wp, hp } from '../../utils/responsive';
+import { SPACING, FONT_SIZES, MAX_CONTENT_WIDTH } from '../../utils/responsive';
 import type { OnboardingSlide as OnboardingSlideType } from '../../constants/onboarding';
 
 interface OnboardingSlideProps {
@@ -14,15 +14,17 @@ export function OnboardingSlide({ slide }: OnboardingSlideProps) {
 
   return (
     <View style={[styles.container, { width }]}>
-      <View style={styles.iconContainer}>
-        <FontAwesome
-          name={slide.icon as any}
-          size={normalize(80)}
-          color={COLORS.primary}
-        />
+      <View style={styles.content}>
+        <View style={styles.iconContainer}>
+          <FontAwesome
+            name={slide.icon as any}
+            size={60}
+            color={COLORS.primary}
+          />
+        </View>
+        <Text style={styles.title}>{slide.title}</Text>
+        <Text style={styles.description}>{slide.description}</Text>
       </View>
-      <Text style={styles.title}>{slide.title}</Text>
-      <Text style={styles.description}>{slide.description}</Text>
     </View>
   );
 }
@@ -34,10 +36,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: SPACING.xl,
   },
+  content: {
+    maxWidth: MAX_CONTENT_WIDTH,
+    alignItems: 'center',
+    width: '100%',
+  },
   iconContainer: {
-    width: normalize(160),
-    height: normalize(160),
-    borderRadius: normalize(80),
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     backgroundColor: COLORS.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
@@ -54,7 +61,7 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.md,
     color: COLORS.textSecondary,
     textAlign: 'center',
-    lineHeight: FONT_SIZES.md * 1.5,
+    lineHeight: 24,
     paddingHorizontal: SPACING.lg,
   },
 });

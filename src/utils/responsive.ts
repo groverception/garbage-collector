@@ -34,6 +34,11 @@ export function hp(percentage: number): number {
 }
 
 export function normalize(size: number): number {
+  // On web, don't scale based on screen width - use fixed sizes
+  if (isWeb) {
+    return size;
+  }
+
   const scale = SCREEN_WIDTH / baseWidth;
   const newSize = size * scale;
 

@@ -1,11 +1,12 @@
 import React from 'react';
 import {
-  TouchableOpacity,
+  Pressable,
   Text,
   StyleSheet,
   ActivityIndicator,
   ViewStyle,
   TextStyle,
+  Platform,
 } from 'react-native';
 import { COLORS } from '../../constants/colors';
 import { SPACING, FONT_SIZES, normalize } from '../../utils/responsive';
@@ -47,11 +48,14 @@ export function Button({
   ];
 
   return (
-    <TouchableOpacity
-      style={buttonStyles}
+    <Pressable
+      style={({ pressed }) => [
+        buttonStyles,
+        pressed && styles.pressed,
+        Platform.OS === 'web' && ({ cursor: 'pointer' } as any),
+      ]}
       onPress={onPress}
       disabled={disabled || loading}
-      activeOpacity={0.7}
     >
       {loading ? (
         <ActivityIndicator
@@ -60,7 +64,7 @@ export function Button({
       ) : (
         <Text style={textStyles}>{title}</Text>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -69,6 +73,9 @@ const styles = StyleSheet.create({
     borderRadius: normalize(8),
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  pressed: {
+    opacity: 0.7,
   },
   primary: {
     backgroundColor: COLORS.primary,
