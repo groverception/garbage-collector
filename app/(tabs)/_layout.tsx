@@ -56,6 +56,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="volunteer"
+        options={{
+          title: 'Volunteer',
+          headerTitle: 'Volunteer Tasks',
+          tabBarIcon: ({ color }) => <TabBarIcon name="hand-paper-o" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="history"
         options={{
           title: 'History',
