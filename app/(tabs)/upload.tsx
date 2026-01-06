@@ -8,6 +8,7 @@ import {
   Platform,
   Alert,
 } from 'react-native';
+import { router } from 'expo-router';
 import { PhotoPicker } from '@/src/components/upload/PhotoPicker';
 import { WarningBanner } from '@/src/components/upload/WarningBanner';
 import { SuccessModal } from '@/src/components/upload/SuccessModal';
@@ -113,7 +114,10 @@ export default function UploadScreen() {
               label="Where was this photo taken?"
               placeholder="Enter location (e.g., Near City Park, MG Road)"
               value={location}
-              onChangeText={setLocation}
+              onChangeText={(text) => {
+                setLocation(text);
+                if (errors.location) setErrors((prev) => ({ ...prev, location: '' }));
+              }}
               error={errors.location}
               multiline
               numberOfLines={2}
@@ -133,7 +137,10 @@ export default function UploadScreen() {
               label="Your name"
               placeholder="Enter your name"
               value={userName}
-              onChangeText={setUserName}
+              onChangeText={(text) => {
+                setUserName(text);
+                if (errors.userName) setErrors((prev) => ({ ...prev, userName: '' }));
+              }}
               error={errors.userName}
             />
 
