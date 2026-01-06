@@ -20,7 +20,7 @@ interface UploadRow {
   image_uri: string;
   thumbnail_uri: string | null;
   location: string;
-  concern: string;
+  description: string;
   user_name: string;
   status: UploadStatus;
   created_at: string;
@@ -45,7 +45,7 @@ class SQLiteStorage implements Database {
         image_uri TEXT NOT NULL,
         thumbnail_uri TEXT,
         location TEXT NOT NULL,
-        concern TEXT NOT NULL,
+        description TEXT NOT NULL,
         user_name TEXT NOT NULL,
         status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'uploaded', 'reviewed', 'rejected')),
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -91,12 +91,12 @@ class SQLiteStorage implements Database {
 
   async createUpload(input: CreateUploadInput): Promise<Upload> {
     const result = await this.db!.runAsync(
-      `INSERT INTO uploads (image_uri, thumbnail_uri, location, concern, user_name)
+      `INSERT INTO uploads (image_uri, thumbnail_uri, location, description, user_name)
        VALUES (?, ?, ?, ?, ?)`,
       input.imageUri,
       input.thumbnailUri ?? null,
       input.location,
-      input.concern,
+      input.description,
       input.userName
     );
 
@@ -120,7 +120,7 @@ class SQLiteStorage implements Database {
       imageUri: row.image_uri,
       thumbnailUri: row.thumbnail_uri,
       location: row.location,
-      concern: row.concern,
+      description: row.description,
       userName: row.user_name,
       status: row.status,
       createdAt: row.created_at,
@@ -138,7 +138,7 @@ class SQLiteStorage implements Database {
       imageUri: row.image_uri,
       thumbnailUri: row.thumbnail_uri,
       location: row.location,
-      concern: row.concern,
+      description: row.description,
       userName: row.user_name,
       status: row.status,
       createdAt: row.created_at,
