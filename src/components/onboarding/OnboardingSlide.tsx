@@ -1,31 +1,110 @@
 import React from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  interpolate,
+  Extrapolate,
+} from 'react-native-reanimated';
 import { FontAwesome } from '@expo/vector-icons';
 import { COLORS } from '../../constants/colors';
 import { SPACING, FONT_SIZES, MAX_CONTENT_WIDTH } from '../../utils/responsive';
 import type { OnboardingSlide as OnboardingSlideType } from '../../constants/onboarding';
+import { PARALLAX_FACTORS } from '@/src/constants/animations';
 
 interface OnboardingSlideProps {
   slide: OnboardingSlideType;
+  index: number;
+  scrollX: Animated.SharedValue<number>;
 }
 
-export function OnboardingSlide({ slide }: OnboardingSlideProps) {
+export function OnboardingSlide({ slide, index, scrollX }: OnboardingSlideProps) {
   const { width } = useWindowDimensions();
+  const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
+
+  // Parallax effect for icon container - moves slower
+  const iconAnimatedStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(
+      scrollX.value,
+      inputRange,
+      [width * PARALLAX_FACTORS.background, 0, -width * PARALLAX_FACTORS.background],
+      Extrapolate.CLAMP
+    );
+
+    const scale = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.8, 1, 0.8],
+      Extrapolate.CLAMP
+    );
+
+    const rotate = interpolate(
+      scrollX.value,
+      inputRange,
+      [15, 0, -15],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      transform: [
+        { translateX },
+        { scale },
+        { rotate: `${rotate}deg` },
+      ],
+    };
+  });
+
+  // Parallax effect for text - moves at normal speed
+  const textAnimatedStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(
+      scrollX.value,
+      inputRange,
+      [width * PARALLAX_FACTORS.midground, 0, -width * PARALLAX_FACTORS.midground],
+      Extrapolate.CLAMP
+    );
+
+    const opacity = interpolate(
+      scrollX.value,
+      inputRange,
+      [0, 1, 0],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      transform: [{ translateX }],
+      opacity,
+    };
+  });
+
+  // Entrance animation for the slide
+  const slideAnimatedStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.3, 1, 0.3],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      opacity,
+    };
+  });
 
   return (
-    <View style={[styles.container, { width }]}>
+    <Animated.View style={[styles.container, { width }, slideAnimatedStyle]}>
       <View style={styles.content}>
-        <View style={styles.iconContainer}>
+        <Animated.View style={[styles.iconContainer, iconAnimatedStyle]}>
           <FontAwesome
             name={slide.icon as any}
             size={60}
             color={COLORS.primary}
           />
-        </View>
-        <Text style={styles.title}>{slide.title}</Text>
-        <Text style={styles.description}>{slide.description}</Text>
+        </Animated.View>
+        <Animated.View style={textAnimatedStyle}>
+          <Text style={styles.title}>{slide.title}</Text>
+          <Text style={styles.description}>{slide.description}</Text>
+        </Animated.View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 

@@ -9,6 +9,7 @@ import {
 import { useFocusEffect } from 'expo-router';
 import { HistoryCard } from '@/src/components/history/HistoryCard';
 import { EmptyState } from '@/src/components/history/EmptyState';
+import { CardSkeleton } from '@/src/components/common';
 import { useUploads } from '@/src/hooks/useUploads';
 import { COLORS } from '@/src/constants/colors';
 import { SPACING, getContentWidth } from '@/src/utils/responsive';
@@ -32,8 +33,13 @@ export default function HistoryScreen() {
 
   if (isLoading && uploads.length === 0) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+      <View style={styles.container}>
+        <View style={styles.listContent}>
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </View>
       </View>
     );
   }

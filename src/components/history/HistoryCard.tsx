@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, Platform } from 'react-native';
+import { View, Text, Image, StyleSheet, Platform, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { SwipeableCard } from '../common';
 import { COLORS } from '../../constants/colors';
 import { SPACING, FONT_SIZES, normalize } from '../../utils/responsive';
 import type { Upload, UploadStatus } from '../../types/upload';
@@ -24,25 +25,68 @@ export function HistoryCard({ upload }: HistoryCardProps) {
     year: 'numeric',
   });
 
+  const handleDelete = () => {
+    Alert.alert(
+      'Delete Report',
+      'Are you sure you want to delete this report?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            // TODO: Implement delete functionality
+            console.log('Delete upload:', upload.id);
+          },
+        },
+      ]
+    );
+  };
+
+  const handleView = () => {
+    // TODO: Implement view details functionality
+    console.log('View upload details:', upload.id);
+    Alert.alert('View Details', `Location: ${upload.location}\nStatus: ${statusConfig.label}`);
+  };
+
   return (
-    <View style={styles.container}>
-      <Image source={{ uri: upload.imageUri }} style={styles.image} />
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.location} numberOfLines={1}>
-            {upload.location}
-          </Text>
-          <View style={[styles.statusBadge, { backgroundColor: statusConfig.color }]}>
-            <FontAwesome name={statusConfig.icon as any} size={10} color={COLORS.textLight} />
-            <Text style={styles.statusText}>{statusConfig.label}</Text>
+    <SwipeableCard
+      leftActions={[
+        {
+          label: 'View',
+          color: COLORS.info,
+          icon: 'eye',
+          onPress: handleView,
+        },
+      ]}
+      rightActions={[
+        {
+          label: 'Delete',
+          color: COLORS.error,
+          icon: 'trash',
+          onPress: handleDelete,
+        },
+      ]}
+    >
+      <View style={styles.container}>
+        <Image source={{ uri: upload.imageUri }} style={styles.image} />
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.location} numberOfLines={1}>
+              {upload.location}
+            </Text>
+            <View style={[styles.statusBadge, { backgroundColor: statusConfig.color }]}>
+              <FontAwesome name={statusConfig.icon as any} size={10} color={COLORS.textLight} />
+              <Text style={styles.statusText}>{statusConfig.label}</Text>
+            </View>
           </View>
+          <Text style={styles.description} numberOfLines={1}>
+            {upload.description}
+          </Text>
+          <Text style={styles.date}>{formattedDate}</Text>
         </View>
-        <Text style={styles.description} numberOfLines={1}>
-          {upload.description}
-        </Text>
-        <Text style={styles.date}>{formattedDate}</Text>
       </View>
-    </View>
+    </SwipeableCard>
   );
 }
 

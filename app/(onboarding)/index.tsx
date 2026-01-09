@@ -9,19 +9,40 @@ import {
   NativeScrollEvent,
 } from 'react-native';
 import { router } from 'expo-router';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { OnboardingSlide } from '@/src/components/onboarding/OnboardingSlide';
 import { Button } from '@/src/components/common/Button';
 import { ONBOARDING_SLIDES } from '@/src/constants/onboarding';
 import { COLORS } from '@/src/constants/colors';
 import { SPACING } from '@/src/utils/responsive';
 import { setOnboardingCompleted } from '@/src/services/database/settings';
+import { MorphingBlob } from '@/src/components/common/MorphingBlob';
+import { FloatingParticles } from '@/src/components/common/FloatingParticles';
+import { LayeredWaves } from '@/src/components/common/AnimatedWave';
+
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export default function OnboardingScreen() {
   const { width } = useWindowDimensions();
   const scrollViewRef = useRef<ScrollView>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollX = useSharedValue(0);
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+  const handleScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+
+      // Update current index
+      const index = Math.round(event.contentOffset.x / width);
+      if (index >= 0 && index < ONBOARDING_SLIDES.length) {
+        // Use runOnJS to update React state from worklet
+        'worklet';
+      }
+    },
+  });
+
+  // Separate handler for pagination dots (non-animated)
+  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / width);
     if (index !== currentIndex && index >= 0 && index < ONBOARDING_SLIDES.length) {
@@ -49,20 +70,46 @@ export default function OnboardingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Animated Background Layers */}
+      <View style={styles.backgroundContainer}>
+        <MorphingBlob
+          size={400}
+          colors={[COLORS.primary, COLORS.primaryLight]}
+          duration={6000}
+          opacity={0.15}
+          style={{ top: -100, right: -100 }}
+        />
+        <MorphingBlob
+          size={350}
+          colors={[COLORS.accent, COLORS.primaryLight]}
+          duration={7000}
+          opacity={0.1}
+          style={{ bottom: -80, left: -80 }}
+        />
+        <LayeredWaves height={250} />
+        <FloatingParticles count={12} />
+      </View>
+
       <View style={styles.slidesContainer}>
-        <ScrollView
+        <AnimatedScrollView
           ref={scrollViewRef}
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
+          onMomentumScrollEnd={handleScrollEnd}
           scrollEventThrottle={16}
           bounces={false}
         >
-          {ONBOARDING_SLIDES.map((slide) => (
-            <OnboardingSlide key={slide.id} slide={slide} />
+          {ONBOARDING_SLIDES.map((slide, index) => (
+            <OnboardingSlide
+              key={slide.id}
+              slide={slide}
+              index={index}
+              scrollX={scrollX}
+            />
           ))}
-        </ScrollView>
+        </AnimatedScrollView>
       </View>
 
       <View style={styles.footer}>
@@ -104,6 +151,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  backgroundContainer: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
   },
   slidesContainer: {
     flex: 1,

@@ -2,48 +2,130 @@ import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolate,
+} from 'react-native-reanimated';
 import { AnimatedTitle } from '@/src/components/landing/AnimatedTitle';
 import { Button } from '@/src/components/common/Button';
 import { CompletedTaskCard } from '@/src/components/home/CompletedTaskCard';
 import { COLORS } from '@/src/constants/colors';
 import { SPACING, FONT_SIZES, normalize, getContentWidth } from '@/src/utils/responsive';
 import { COMPLETED_TASKS, IMPACT_STATS } from '@/src/data/completedTasks';
+import { MorphingBlob } from '@/src/components/common/MorphingBlob';
+import { GeometricPattern } from '@/src/components/common/GeometricPattern';
+import { FloatingParticles } from '@/src/components/common/FloatingParticles';
+import { usePulseAnimation } from '@/src/hooks/useContinuousAnimation';
+import { useAnimatedEntrance } from '@/src/hooks/useAnimatedEntrance';
+
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export default function HomeScreen() {
+  const scrollY = useSharedValue(0);
+  const iconPulse = usePulseAnimation({ scale: 1.05, duration: 2000 });
+  const heroEntrance = useAnimatedEntrance({ type: 'bounce', delay: 200 });
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
   const handleUpload = () => {
     router.push('/(tabs)/upload');
   };
 
+  // Parallax effect for hero section
+  const heroAnimatedStyle = useAnimatedStyle(() => {
+    const translateY = interpolate(
+      scrollY.value,
+      [0, 300],
+      [0, -50],
+      Extrapolate.CLAMP
+    );
+
+    const scale = interpolate(
+      scrollY.value,
+      [0, 300],
+      [1, 0.9],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      transform: [{ translateY }, { scale }],
+    };
+  });
+
+  // Fade effect for tagline
+  const taglineAnimatedStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      scrollY.value,
+      [0, 150],
+      [1, 0],
+      Extrapolate.CLAMP
+    );
+
+    return { opacity };
+  });
+
+  // Animated icon container
+  const iconAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: iconPulse.value }],
+      opacity: heroEntrance.opacity.value,
+    };
+  });
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
+      {/* Animated Background Layers */}
+      <View style={styles.backgroundContainer}>
+        <GeometricPattern variant="circles" opacity={0.08} />
+        <MorphingBlob
+          size={500}
+          colors={[COLORS.primary, COLORS.primaryLight]}
+          duration={8000}
+          opacity={0.12}
+          style={{ top: -150, right: -150 }}
+        />
+        <MorphingBlob
+          size={400}
+          colors={[COLORS.accent, COLORS.secondary]}
+          duration={10000}
+          opacity={0.08}
+          style={{ bottom: 100, left: -100 }}
+        />
+        <FloatingParticles
+          count={10}
+          icons={['leaf', 'recycle', 'flower', 'sprout']}
+          colors={[COLORS.primary, COLORS.accent, COLORS.success]}
+        />
+      </View>
+
+      <AnimatedScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
       >
         <View style={styles.content}>
-          <View style={styles.heroSection}>
-            <View style={styles.iconContainer}>
+          <Animated.View style={[styles.heroSection, heroAnimatedStyle]}>
+            <Animated.View style={[styles.iconContainer, iconAnimatedStyle]}>
               <FontAwesome name="recycle" size={normalize(60)} color={COLORS.primary} />
-            </View>
+            </Animated.View>
             <AnimatedTitle />
-            <Text style={styles.tagline}>
+            <Animated.Text style={[styles.tagline, taglineAnimatedStyle]}>
               Help keep our city clean by reporting garbage in public spaces
-            </Text>
-          </View>
+            </Animated.Text>
+          </Animated.View>
 
           <View style={styles.statsSection}>
-            <View style={styles.statItem}>
-              <FontAwesome name="camera" size={24} color={COLORS.primary} />
-              <Text style={styles.statLabel}>Snap a photo</Text>
-            </View>
-            <View style={styles.statItem}>
-              <FontAwesome name="map-marker" size={24} color={COLORS.primary} />
-              <Text style={styles.statLabel}>Share location</Text>
-            </View>
-            <View style={styles.statItem}>
-              <FontAwesome name="check-circle" size={24} color={COLORS.primary} />
-              <Text style={styles.statLabel}>Make an impact</Text>
-            </View>
+            <StatsItem icon="camera" label="Snap a photo" delay={0} />
+            <StatsItem icon="map-marker" label="Share location" delay={100} />
+            <StatsItem icon="check-circle" label="Make an impact" delay={200} />
           </View>
 
           <Button
@@ -64,22 +146,30 @@ export default function HomeScreen() {
               <Text style={styles.sectionTitle}>Community Impact</Text>
             </View>
             <View style={styles.impactGrid}>
-              <View style={styles.impactCard}>
-                <Text style={styles.impactNumber}>{IMPACT_STATS.totalReports.toLocaleString()}</Text>
-                <Text style={styles.impactLabel}>Reports Filed</Text>
-              </View>
-              <View style={styles.impactCard}>
-                <Text style={[styles.impactNumber, { color: COLORS.success }]}>{IMPACT_STATS.resolvedThisWeek}</Text>
-                <Text style={styles.impactLabel}>Resolved This Week</Text>
-              </View>
-              <View style={styles.impactCard}>
-                <Text style={[styles.impactNumber, { color: COLORS.secondary }]}>{IMPACT_STATS.activeVolunteers}</Text>
-                <Text style={styles.impactLabel}>Active Volunteers</Text>
-              </View>
-              <View style={styles.impactCard}>
-                <Text style={[styles.impactNumber, { color: COLORS.accent }]}>{IMPACT_STATS.citiesCovered}</Text>
-                <Text style={styles.impactLabel}>Cities Covered</Text>
-              </View>
+              <ImpactCard
+                number={IMPACT_STATS.totalReports.toLocaleString()}
+                label="Reports Filed"
+                color={COLORS.primary}
+                delay={0}
+              />
+              <ImpactCard
+                number={IMPACT_STATS.resolvedThisWeek}
+                label="Resolved This Week"
+                color={COLORS.success}
+                delay={100}
+              />
+              <ImpactCard
+                number={IMPACT_STATS.activeVolunteers}
+                label="Active Volunteers"
+                color={COLORS.secondary}
+                delay={200}
+              />
+              <ImpactCard
+                number={IMPACT_STATS.citiesCovered}
+                label="Cities Covered"
+                color={COLORS.accent}
+                delay={300}
+              />
             </View>
           </View>
 
@@ -94,8 +184,8 @@ export default function HomeScreen() {
             </Text>
 
             <View style={styles.tasksList}>
-              {COMPLETED_TASKS.slice(0, 5).map((task) => (
-                <CompletedTaskCard key={task.id} task={task} />
+              {COMPLETED_TASKS.slice(0, 5).map((task, index) => (
+                <AnimatedTaskCard key={task.id} task={task} index={index} />
               ))}
             </View>
 
@@ -107,8 +197,74 @@ export default function HomeScreen() {
             />
           </View>
         </View>
-      </ScrollView>
+      </AnimatedScrollView>
     </SafeAreaView>
+  );
+}
+
+// Animated Stats Item Component
+function StatsItem({ icon, label, delay }: { icon: string; label: string; delay: number }) {
+  const entrance = useAnimatedEntrance({ type: 'slideUp', delay: 400 + delay });
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: entrance.opacity.value,
+      transform: [{ translateY: entrance.translateY.value }],
+    };
+  });
+
+  return (
+    <Animated.View style={[styles.statItem, animatedStyle]}>
+      <FontAwesome name={icon as any} size={24} color={COLORS.primary} />
+      <Text style={styles.statLabel}>{label}</Text>
+    </Animated.View>
+  );
+}
+
+// Animated Impact Card Component
+function ImpactCard({
+  number,
+  label,
+  color,
+  delay,
+}: {
+  number: string | number;
+  label: string;
+  color: string;
+  delay: number;
+}) {
+  const entrance = useAnimatedEntrance({ type: 'scale', delay: 600 + delay });
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: entrance.opacity.value,
+      transform: [{ scale: entrance.scale.value }],
+    };
+  });
+
+  return (
+    <Animated.View style={[styles.impactCard, animatedStyle]}>
+      <Text style={[styles.impactNumber, { color }]}>{number}</Text>
+      <Text style={styles.impactLabel}>{label}</Text>
+    </Animated.View>
+  );
+}
+
+// Animated Task Card Wrapper
+function AnimatedTaskCard({ task, index }: { task: any; index: number }) {
+  const entrance = useAnimatedEntrance({ type: 'slideUp', delay: 800 + index * 100 });
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: entrance.opacity.value,
+      transform: [{ translateY: entrance.translateY.value }],
+    };
+  });
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <CompletedTaskCard task={task} />
+    </Animated.View>
   );
 }
 
@@ -116,6 +272,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  backgroundContainer: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
   },
   scrollContent: {
     flexGrow: 1,
