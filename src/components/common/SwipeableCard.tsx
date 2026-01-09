@@ -8,9 +8,8 @@ import Animated, {
   runOnJS,
   interpolate,
   Extrapolate,
-  useAnimatedGestureHandler,
 } from 'react-native-reanimated';
-import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { FontAwesome } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { COLORS } from '@/src/constants/colors';
@@ -83,15 +82,12 @@ export function SwipeableCard({
     }, 300);
   };
 
-  const gestureHandler = useAnimatedGestureHandler<
-    PanGestureHandlerGestureEvent,
-    { startX: number }
-  >({
-    onStart: (_, ctx) => {
-      ctx.startX = translateX.value;
-    },
-    onActive: (event, ctx) => {
-      const newTranslateX = ctx.startX + event.translationX;
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      // Store the starting position
+    })
+    .onUpdate((event) => {
+      const newTranslateX = event.translationX;
 
       // Limit swipe distance
       if (leftActions && newTranslateX > 0) {
@@ -104,8 +100,8 @@ export function SwipeableCard({
       if (Math.abs(event.translationX) > SWIPE_THRESHOLD && haptic) {
         runOnJS(triggerHaptic)();
       }
-    },
-    onEnd: (event) => {
+    })
+    .onEnd((event) => {
       const shouldSwipeLeft = event.translationX < -SWIPE_THRESHOLD && rightActions;
       const shouldSwipeRight = event.translationX > SWIPE_THRESHOLD && leftActions;
 
@@ -120,8 +116,7 @@ export function SwipeableCard({
           stiffness: 300,
         });
       }
-    },
-  });
+    });
 
   const animatedCardStyle = useAnimatedStyle(() => {
     return {
@@ -188,9 +183,9 @@ export function SwipeableCard({
       )}
 
       {/* Card content */}
-      <PanGestureHandler onGestureEvent={gestureHandler}>
+      <GestureDetector gesture={panGesture}>
         <Animated.View style={[styles.card, animatedCardStyle]}>{children}</Animated.View>
-      </PanGestureHandler>
+      </GestureDetector>
     </View>
   );
 }
