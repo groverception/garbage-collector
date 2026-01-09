@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, Platform, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { Card3D } from '../common';
 import { COLORS } from '../../constants/colors';
 import { SPACING, FONT_SIZES, normalize } from '../../utils/responsive';
 
@@ -44,13 +45,7 @@ export function CompletedTaskCard({ task, onPress }: CompletedTaskCardProps) {
   };
 
   return (
-    <Pressable
-      style={({ pressed }) => [
-        styles.container,
-        pressed && styles.pressed,
-      ]}
-      onPress={onPress}
-    >
+    <Card3D intensity={15} shadowIntensity={0.3} onPress={onPress}>
       <View style={styles.imageContainer}>
         <Image source={{ uri: task.imageUri }} style={styles.image} />
         <View style={styles.completedBadge}>
@@ -104,7 +99,7 @@ export function CompletedTaskCard({ task, onPress }: CompletedTaskCardProps) {
           </View>
         </View>
       </View>
-    </Pressable>
+    </Card3D>
   );
 }
 

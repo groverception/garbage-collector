@@ -1,17 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Modal, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  withSequence,
   withDelay,
-  runOnJS,
 } from 'react-native-reanimated';
 import { FontAwesome } from '@expo/vector-icons';
 import { COLORS } from '../../constants/colors';
 import { SPACING, FONT_SIZES, normalize } from '../../utils/responsive';
-import { Button } from '../common/Button';
+import { RippleButton, SuccessConfetti } from '../common';
 
 interface SuccessModalProps {
   visible: boolean;
@@ -22,18 +20,23 @@ export function SuccessModal({ visible, onClose }: SuccessModalProps) {
   const scale = useSharedValue(0);
   const opacity = useSharedValue(0);
   const checkScale = useSharedValue(0);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
     if (visible) {
       opacity.value = withSpring(1);
       scale.value = withSpring(1, { damping: 20, stiffness: 200 });
       checkScale.value = withDelay(200, withSpring(1, { damping: 18, stiffness: 200 }));
+
+      // Trigger confetti after modal appears
+      setTimeout(() => setShowConfetti(true), 300);
     } else {
       opacity.value = 0;
       scale.value = 0;
       checkScale.value = 0;
+      setShowConfetti(false);
     }
-  }, [visible, opacity, scale, checkScale]);
+  }, [visible]);
 
   const overlayStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -63,13 +66,20 @@ export function SuccessModal({ visible, onClose }: SuccessModalProps) {
           <Text style={styles.message}>
             Thank you for reporting. Your contribution helps keep our city clean.
           </Text>
-          <Button
+          <RippleButton
             title="Continue"
             onPress={onClose}
-            size="large"
+            variant="primary"
+            fullWidth
             style={styles.button}
           />
         </Animated.View>
+
+        {/* Confetti celebration */}
+        <SuccessConfetti
+          active={showConfetti}
+          onComplete={() => setShowConfetti(false)}
+        />
       </Animated.View>
     </Modal>
   );

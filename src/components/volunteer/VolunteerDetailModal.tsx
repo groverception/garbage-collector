@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { GlassCard } from '../common';
 import { COLORS } from '../../constants/colors';
 import { SPACING, FONT_SIZES, normalize, getContentWidth } from '../../utils/responsive';
 import { CONCERN_OPTIONS } from '../../constants/concerns';
@@ -260,7 +261,7 @@ export function VolunteerDetailModal({
                   Comments ({task.comments.length})
                 </Text>
                 {task.comments.map((c) => (
-                  <View key={c.id} style={styles.commentCard}>
+                  <GlassCard key={c.id} blurIntensity={20} style={styles.commentCard}>
                     <View style={styles.commentHeader}>
                       <Text style={styles.commentUser}>{c.userName}</Text>
                       <Text style={styles.commentDate}>
@@ -271,7 +272,7 @@ export function VolunteerDetailModal({
                       </Text>
                     </View>
                     <Text style={styles.commentText}>{c.comment}</Text>
-                  </View>
+                  </GlassCard>
                 ))}
               </View>
 

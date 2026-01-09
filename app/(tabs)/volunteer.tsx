@@ -3,18 +3,22 @@ import {
   View,
   FlatList,
   StyleSheet,
-  RefreshControl,
   ActivityIndicator,
   Text,
+  ScrollView,
 } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useFocusEffect } from 'expo-router';
 import { VolunteerCard, VolunteerDetailModal, FilterBar } from '@/src/components/volunteer';
 import { EmptyState } from '@/src/components/history/EmptyState';
+import { PullToRefresh } from '@/src/components/common';
 import { useVolunteer } from '@/src/hooks/useVolunteer';
 import { useAppContext } from '@/src/context/AppContext';
 import { COLORS } from '@/src/constants/colors';
 import { SPACING, FONT_SIZES, getContentWidth } from '@/src/utils/responsive';
 import type { VolunteerTask, VolunteerTaskStatus } from '@/src/types/volunteer';
+
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<VolunteerTask>);
 
 export default function VolunteerScreen() {
   const { userName } = useAppContext();
@@ -172,35 +176,34 @@ export default function VolunteerScreen() {
         </Text>
       </View>
 
-      <FlatList
-        data={filteredTasks}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        contentContainerStyle={[
-          styles.listContent,
-          filteredTasks.length === 0 && styles.emptyListContent,
-        ]}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={reload}
-            tintColor={COLORS.primary}
-            colors={[COLORS.primary]}
-          />
-        }
-        ListEmptyComponent={
-          <EmptyState
-            icon="hand-paper-o"
-            title="No tasks found"
-            message={
-              filters.status !== 'all'
-                ? `No ${filters.status.replace('_', ' ')} tasks available. Try changing the filter.`
-                : 'No volunteer tasks available at the moment. Check back later!'
-            }
-          />
-        }
-      />
+      <PullToRefresh
+        onRefresh={reload}
+        refreshing={isLoading}
+        threshold={80}
+      >
+        <AnimatedFlatList
+          data={filteredTasks}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={[
+            styles.listContent,
+            filteredTasks.length === 0 && styles.emptyListContent,
+          ]}
+          showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+          ListEmptyComponent={
+            <EmptyState
+              icon="hand-paper-o"
+              title="No tasks found"
+              message={
+                filters.status !== 'all'
+                  ? `No ${filters.status.replace('_', ' ')} tasks available. Try changing the filter.`
+                  : 'No volunteer tasks available at the moment. Check back later!'
+              }
+            />
+          }
+        />
+      </PullToRefresh>
 
       <VolunteerDetailModal
         visible={modalVisible}
